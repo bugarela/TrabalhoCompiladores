@@ -1,6 +1,8 @@
 module Head where
 
-data Literal = Str String | Inte Integer deriving(Show)
+data Literal = Str String | Numb Numeral deriving(Show)
+
+data Numeral = Inte Integer | Flutuante Double deriving(Show)
 
 type Identificador = String
 
@@ -42,7 +44,7 @@ data ExpressaoAritmetica = Multiplicacao ExpressaoAritmetica ExpressaoAritmetica
                          | Adicao ExpressaoAritmetica ExpressaoAritmetica
                          | Subtracao ExpressaoAritmetica ExpressaoAritmetica
                          | Neg ExpressaoAritmetica
-                         | Numero Integer
+                         | Numero Numeral
                          deriving (Show)
 
 data ExpressaoLogica = E ExpressaoLogica ExpressaoLogica

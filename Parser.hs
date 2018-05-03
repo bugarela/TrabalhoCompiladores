@@ -1,178 +1,188 @@
 import Text.Parsec
 import Text.Parsec.Expr
+import qualified Text.Parsec.Token as Token
 import Text.Parsec.Language
 import Data.Char
 import Head
 
 import Control.Monad.Identity (Identity)
 
-{-# LANGUAGE NoMonomorphismRestriction #-}
-
 reservados = ",;.(){}"
+
+ws = do {many (oneOf " \n"); return()}
 
 parseFile a = do f <- readFile a
                  let e = parse programa "Error:" (f)
                  return e
 
 --expressaoAritmetica :: Parsec String () ExpressaoAritmetica
-expressaoAritmetica = buildExpressionParser operadoresAritmeticos numero <|> numero
+expressaoAritmetica = buildExpressionParser operadoresAritmeticos atomoAritmetico <|> atomoAritmetico
 
 operadoresAritmeticos :: [[Operator String u Identity ExpressaoAritmetica]]
-operadoresAritmeticos = [[Prefix (spaces >> char '-' >> spaces >> return (Neg))],
+operadoresAritmeticos = [[Prefix (ws >> char '-' >> ws >> return (Neg))],
 
-                        [Infix  (spaces >> char '*' >> spaces >> return (Multiplicacao)) AssocLeft,
-                         Infix  (spaces >> char '/' >> spaces >> return (Divisao)) AssocLeft],
+                        [Infix  (ws >> char '*' >> ws >> return (Multiplicacao)) AssocLeft,
+                         Infix  (ws >> char '/' >> ws >> return (Divisao)) AssocLeft],
 
-                        [Infix  (spaces >> char '+' >> spaces >> return (Adicao)) AssocLeft,
-                         Infix  (spaces >> char '-' >> spaces >> return (Subtracao)) AssocLeft]]
+                        [Infix  (ws >> char '+' >> ws >> return (Adicao)) AssocLeft,
+                         Infix  (ws >> char '-' >> ws >> return (Subtracao)) AssocLeft]]
 
 expressaoLogica = buildExpressionParser operadoresLogicos expressaoRelacional <|> expressaoRelacional
 
 
 operadoresLogicos :: [[Operator String u Identity ExpressaoLogica]]
-operadoresLogicos = [[Prefix (char '!' >> spaces >> return (Nao))],
+operadoresLogicos = [[Prefix (char '!' >> ws >> return (Nao))],
 
-                     [Infix  (string "&&" >> spaces >> return (E)) AssocLeft,
-                      Infix  (string "||" >> spaces >> return (Ou)) AssocLeft]]
+                     [Infix  (string "&&" >> ws >> return (E)) AssocLeft,
+                      Infix  (string "||" >> ws >> return (Ou)) AssocLeft]]
 
 --operadoresRelacionais :: [[Operator String u m ExpressaoRelacional]]
-operadoresRelacionais = (char '>' >> spaces >> return (Maior))
+operadoresRelacionais = (char '>' >> ws >> return (Maior))
                         <|>
-                        (char '<' >> spaces >> return (Menor))
+                        (char '<' >> ws >> return (Menor))
                         <|>
-                        (string ">=" >> spaces >> return (MaiorIgual))
+                        (string ">=" >> ws >> return (MaiorIgual))
                         <|>
-                        (string "<=" >> spaces >> return (MenorIgual))
+                        (string "<=" >> ws >> return (MenorIgual))
                         <|>
-                        (string "==" >> spaces >> return (Igual))
+                        (string "==" >> ws >> return (Igual))
                         <|>
-                        (string "!=" >> spaces >> return (Diferente))
+                        (string "!=" >> ws >> return (Diferente))
 
 expressaoRelacional = do try $ do l <- expressaoAritmetica
-                                  spaces
+                                  ws
                                   o <- operadoresRelacionais
                                   r <- expressaoAritmetica
-                                  spaces
+                                  ws
                                   return (ER (o l r))
 
 listaParametros = parametro `sepBy` (char ',')
 
-parametro = do {e <- expressaoAritmetica; spaces; return (ParametroExpressao e)}
+parametro = do {e <- expressaoAritmetica; ws; return (ParametroExpressao e)}
             <|>
-            do {l <- literal; spaces; return (ParametroLiteral l)}
+            do {l <- literal; ws; return (ParametroLiteral l)}
 
 chamadaFuncao = do try $ do i <-identificador
-                            spaces
+                            ws
                             char '('
-                            spaces
+                            ws
                             ps <- listaParametros
-                            spaces
+                            ws
                             char ')'
-                            spaces
+                            ws
                             return (Chamada i ps)
 
 chamadaProc = do f <- chamadaFuncao
                  char ';'
-                 spaces
+                 ws
                  return (ChamadaProc f)
 
-cmdLeitura = do try $ do string "read("
-                         spaces
+cmdLeitura = do try $ do string "read"
+                         ws
+                         char '('
+                         ws
                          i <- identificador
                          char ')'
-                         spaces
+                         ws
                          char ';'
-                         spaces
+                         ws
                          return (Le i)
 
-cmdEscrita = do try $ do string "print("
-                         spaces
+cmdEscrita = do try $ do string "print"
+                         ws
+                         char '('
+                         ws
                          p <- parametro
                          char ')'
-                         spaces
+                         ws
                          char ';'
-                         spaces
+                         ws
                          return (Escreve p)
 
 cmdAtrib = do try $ do i <- identificador
                        char '='
-                       spaces
+                       ws
                        p <- parametro
-                       spaces
+                       ws
                        char ';'
-                       spaces
+                       ws
                        return (Atribui i p)
 
-cmdEnquanto = do try $ do string "while("
-                          spaces
+cmdEnquanto = do try $ do string "while"
+                          ws
+                          char '('
+                          ws
                           el <- expressaoLogica
-                          spaces
+                          ws
                           char ')'
                           b <- bloco
                           return (While el b)
 
 cmdSe = do try $ do string "if"
-                    spaces
+                    ws
                     char '('
-                    spaces
+                    ws
                     el <- expressaoLogica
-                    spaces
+                    ws
                     char ')'
-                    spaces
+                    ws
                     b1 <- bloco
                     string "else"
-                    spaces
+                    ws
                     b2 <- bloco
                     return (If el b1 b2)
        <|>
        do string "if"
-          spaces
+          ws
           char '('
-          spaces
+          ws
           el <- expressaoLogica
-          spaces
+          ws
           char ')'
-          spaces
+          ws
           b1 <- bloco
           return (If el b1 [])
 
 retorno = do string "return "
-             spaces
+             ws
              p <- parametro
-             spaces
+             ws
              return (Ret p)
 
 comando = cmdSe <|> cmdEnquanto <|> cmdAtrib <|> cmdEscrita <|> cmdLeitura <|> chamadaProc <|> retorno
 listaCmd = many1 comando
 
 bloco = do char '{'
+           ws
            cs <- listaCmd
+           ws
            char '}'
-           spaces
+           ws
            return cs
 
-tipo = do {string "int"; spaces; return (Inteiro)}
+tipo = do {string "int"; ws; return (Inteiro)}
        <|>
-       do {string "string"; spaces; return (String')}
+       do {string "string"; ws; return (String')}
        <|>
-       do {string "float"; spaces; return (Float)}
+       do {string "float"; ws; return (Float)}
 
-void = do {string "void"; spaces; return Void}
+void = do {string "void"; ws; return Void}
 
 tipoRetorno = do {t <- tipo; return (R t)} <|> void
 
 declaracao = do try $ do t <- tipo
-                         spaces
+                         ws
                          is <- listaId
                          char ';'
-                         spaces
+                         ws
                          return (Decl t is)
 
 blocoPrincipal = do char '{'
+                    ws
                     ds <- many declaracao
                     cs <- listaCmd
                     char '}'
-                    spaces
+                    ws
                     return (Main ds cs)
 
 parametroFormal = do t <- tipo
@@ -189,32 +199,37 @@ funcao = do try $ do tr <- tipoRetorno
 
 programa = do fs <- many funcao
               b <- blocoPrincipal
+              ws
               return (Prog fs b)
 
 identificador :: Parsec String () (Identificador)
 identificador = do s <- oneOf (['a'..'z'] ++ ['_'])
                    ss <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['-','_']))
-                   spaces
+                   ws
                    return (s:ss)
 
 listaId = identificador `sepBy` (char ',')
 
-literal = do try $ do digits <- many1 digit
-                      let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
-                      spaces
-                      return (Inte n)
+literal = do try $ do n <- numero
+                      return (Numb n)
           <|>
           do try $ do {cs <- many1 (noneOf reservados); return (Str cs)}
 
-numero = do try $ do digits <- many1 digit
-                     let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
-                     spaces
-                     return (Numero n)
+atomoAritmetico = do {n <- numero; return (Numero n)}
+                  <|>
+                  do char '('
+                     ws
+                     e <- expressaoAritmetica
+                     ws
+                     char ')'
+                     ws
+                     return e
+
+numero = do try $ do f <- Token.float (Token.makeTokenParser emptyDef)
+                     ws
+                     return (Flutuante f)
          <|>
-         do char '('
-            spaces
-            e <- expressaoAritmetica
-            spaces
-            char ')'
-            spaces
-            return e
+         do try $ do digits <- many1 digit
+                     let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
+                     ws
+                     return (Inte n)
