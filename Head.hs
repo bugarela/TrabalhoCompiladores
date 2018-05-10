@@ -1,18 +1,22 @@
 module Head where
 
+data Programa = Prog [DeclaracaoFuncao] BlocoPrincipal deriving(Show)
+
+data BlocoPrincipal = Main [Declaracao] Bloco deriving(Show)
+
+type Bloco = [Comando]
+
 data Literal = Str String | Numb Numeral deriving(Show)
 
 data Numeral = Inte Integer | Flutuante Double deriving(Show)
 
 type Identificador = String
 
-data Tipo = Inteiro | String' | Float deriving(Show)
+data Tipo = TInt | TString | TFloat deriving (Eq)
+
+data RelacaoTipo = Identificador :>: Tipo deriving (Eq, Show)
 
 data Retorno = R Tipo | Void deriving(Show)
-
-data Programa = Prog [DeclaracaoFuncao] BlocoPrincipal deriving(Show)
-
-data BlocoPrincipal = Main [Declaracao] Bloco deriving(Show)
 
 data DeclaracaoFuncao = Funcao Retorno Identificador DeclParametros BlocoPrincipal deriving(Show)
 
@@ -27,8 +31,6 @@ data Parametro = ParametroLiteral Literal
                deriving(Show)
 
 data Declaracao = Decl Tipo [Identificador] deriving(Show)
-
-type Bloco = [Comando]
 
 data Comando = If ExpressaoLogica Bloco Bloco
              | While ExpressaoLogica Bloco
@@ -61,9 +63,10 @@ data ExpressaoRelacional = Maior ExpressaoAritmetica ExpressaoAritmetica
                          | Diferente ExpressaoAritmetica ExpressaoAritmetica
                          deriving (Show)
 
+type TabelaDeSimbolos = [RelacaoTipo]
 
 
-{-instance Show ExpressaoLogica where
-   show (BinarioLogico E a b) = "(" ++ show a ++ " && " ++ show b ++ ")"
-   show (Nao a) = "!" ++ show a
-   show Verdadeiro = "Verdadeiro" -}
+instance Show Tipo where
+  show TInt = "int"
+  show TFloat = "float"
+  show TString = "string"

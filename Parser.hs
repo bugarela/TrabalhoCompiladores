@@ -1,3 +1,5 @@
+module Parser where
+
 import Text.Parsec
 import Text.Parsec.Expr
 import qualified Text.Parsec.Token as Token
@@ -160,11 +162,11 @@ bloco = do char '{'
            ws
            return cs
 
-tipo = do {string "int"; ws; return (Inteiro)}
+tipo = do {string "int"; ws; return (TInt)}
        <|>
-       do {string "string"; ws; return (String')}
+       do {string "string"; ws; return (TString)}
        <|>
-       do {string "float"; ws; return (Float)}
+       do {string "float"; ws; return (TFloat)}
 
 void = do {string "void"; ws; return Void}
 
