@@ -1,6 +1,12 @@
 {
-    int a,d;
-    float b;
-    string c;
-    a = d;
+    int a,b,c;
+    float d;
+    string s1;
+    t1 = 1 + 2;
+    t2 = c + 2;
+    t3 = 1 + d;
+    t4 = 1.0 - d;
+    t5 = 1.0 * 1;
+    t6 = a / 1.0;
+    t7 = -(a + b) * 1.0;
 }

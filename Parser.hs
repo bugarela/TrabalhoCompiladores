@@ -202,11 +202,12 @@ funcao = do try $ do tr <- tipoRetorno
 programa = do fs <- many funcao
               b <- blocoPrincipal
               ws
+              eof
               return (Prog fs b)
 
 identificador :: Parsec String () (Identificador)
 identificador = do s <- oneOf (['a'..'z'] ++ ['_'])
-                   ss <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['-','_']))
+                   ss <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['-','_'] ++ ['0'..'9']))
                    ws
                    return (s:ss)
 
@@ -218,6 +219,8 @@ literal = do try $ do n <- numero
           do try $ do {cs <- many1 (noneOf reservados); return (Str cs)}
 
 atomoAritmetico = do {n <- numero; return (Numero n)}
+                  <|>
+                  do {i <- identificador; return (Var i)}
                   <|>
                   do char '('
                      ws
@@ -234,4 +237,4 @@ numero = do try $ do f <- Token.float (Token.makeTokenParser emptyDef)
          do try $ do digits <- many1 digit
                      let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
                      ws
-                     return (Inte n)
+                     return (Inteiro n)

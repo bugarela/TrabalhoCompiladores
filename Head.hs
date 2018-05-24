@@ -1,5 +1,7 @@
 module Head where
 
+import RBTree
+
 data Programa = Prog [DeclaracaoFuncao] BlocoPrincipal deriving(Show)
 
 data BlocoPrincipal = Main [Declaracao] Bloco deriving(Show)
@@ -8,7 +10,7 @@ type Bloco = [Comando]
 
 data Literal = Str String | Numb Numeral deriving(Show)
 
-data Numeral = Inte Integer | Flutuante Double deriving(Show)
+data Numeral = Inteiro Integer | Flutuante Double
 
 type Identificador = String
 
@@ -47,6 +49,7 @@ data ExpressaoAritmetica = Multiplicacao ExpressaoAritmetica ExpressaoAritmetica
                          | Subtracao ExpressaoAritmetica ExpressaoAritmetica
                          | Neg ExpressaoAritmetica
                          | Numero Numeral
+                         | Var Identificador
                          deriving (Show)
 
 data ExpressaoLogica = E ExpressaoLogica ExpressaoLogica
@@ -63,8 +66,11 @@ data ExpressaoRelacional = Maior ExpressaoAritmetica ExpressaoAritmetica
                          | Diferente ExpressaoAritmetica ExpressaoAritmetica
                          deriving (Show)
 
-type TabelaDeSimbolos = [RelacaoTipo]
+type TabelaDeSimbolos = RBTree RelacaoTipo
 
+instance Show Numeral where
+  show (Inteiro i) = show i
+  show (Flutuante f) = show f
 
 instance Show Tipo where
   show TInt = "int"
