@@ -66,7 +66,7 @@ data ExpressaoRelacional = Maior ExpressaoAritmetica ExpressaoAritmetica
                          | Diferente ExpressaoAritmetica ExpressaoAritmetica
                          deriving (Show)
 
-type TabelaDeSimbolos = RBTree RelacaoTipo
+type TabelaDeSimbolos = RBTree (RelacaoTipo,Integer)
 
 instance Show Numeral where
   show (Inteiro i) = show i

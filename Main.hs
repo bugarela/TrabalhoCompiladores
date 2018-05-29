@@ -10,10 +10,10 @@ testeTabelaDeSimbolos a = do ls <- parseFile a
                              return ()
 
 testeArvoreSintatica a = do ls <- parseFile a
-                            case ls of
-                               Left e -> print e
-                               Right ls -> print (snd (semanticaPrograma ls)::[String])
-                            return ()
+                            let s = case ls of
+                                     Left e -> ""
+                                     Right ls -> show (snd (semanticaPrograma ls))
+                            return s
 
 semanticaPrograma (Prog fs b) = semanticaBlocoPrincipal b-- e semanticaFuncoes de alguma forma
 
@@ -23,9 +23,9 @@ semanticaBlocoPrincipal (Main ds b) = let ts = semanticaDeclaracoes ds in (ts,se
 
 semanticaBloco ts cs = map (semanticaComando ts) cs
 
-semanticaComando ts (Atribui i (ParametroExpressao p)) = i ++ " = " ++ semanticaExpressaoAritmetica ts p
+semanticaComando ts (Atribui i (ParametroExpressao p)) = i ++ " = " ++ (showLista (semanticaExpressaoAritmetica ts p))
 semanticaComando _ _ = ""
 
-semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB
+semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
 
 semanticaExpressaoAritmetica ts e = let (sea,_) = encontraCoercoes ts e in sea
