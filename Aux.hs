@@ -66,13 +66,10 @@ coercaoExpr ts (a,TInt) (b,TInt) = (a,b,TInt)
 coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
 coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2F"],b,TFloat)
 coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2F"],TFloat)
-{-
-traduzComparacao (Maior a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["imul"], t)
 
-    Maior ExpressaoAritmetica ExpressaoAritmetica
-                             | Menor ExpressaoAritmetica ExpressaoAritmetica
-                             | MaiorIgual ExpressaoAritmetica ExpressaoAritmetica
-                             | MenorIgual ExpressaoAritmetica ExpressaoAritmetica
-                             | Igual ExpressaoAritmetica ExpressaoAritmetica
-                             | Diferente ExpressaoAritmetica ExpressaoAritmetica
-                             -}
+traduzComparacao (Maior a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpgt"])
+traduzComparacao (Menor a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmplt"])
+traduzComparacao (MaiorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpge"])
+traduzComparacao (MenorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmple"])
+traduzComparacao (Igual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpeq"])
+traduzComparacao (Diferente a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpne"])
