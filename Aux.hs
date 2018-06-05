@@ -18,13 +18,23 @@ insereTabelaSimbolos ((Decl t (i:is)):ds) ts p = if (busca ts ((i :>: t), p) /= 
 
 tipoEA _ (Numero (Inteiro _)) = TInt
 tipoEA _ (Numero (Flutuante _)) = TFloat
-tipoEA ts (Var i) = case busca ts ((i :>: TInt), 0) of
-                         Nothing -> error("Variavel " ++ show i ++ " indefinida")
-                         Just ((_ :>: t),_) -> t
+tipoEA ts (Var i) = tipoVariavel i ts
 
 posicao i ts = case busca ts ((i :>: TInt), 0) of
                     Nothing -> error("Variavel " ++ show i ++ " indefinida")
                     Just ((_ :>: _),p) -> show p
+
+tipoVariavel i ts = case busca ts ((i :>: TInt), 0) of
+                         Nothing -> error("Variavel " ++ show i ++ " indefinida")
+                         Just ((_ :>: t),_) -> t
+
+store i TString ts = if (tipoVariavel i ts == TString) then ["nseicomo " ++ posicao i ts]
+                                              else error ("Atribuição de algo tipo string para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
+store i TInt ts = if (tipoVariavel i ts == TFloat) then ["i2f","fstore " ++ posicao i ts] else
+                  if (tipoVariavel i ts == TInt) then ["istore " ++ posicao i ts] else
+                      error ("Atribuição de algo tipo int para a variavel " ++ i ++ " do tipo string")
+store i TFloat ts = if (tipoVariavel i ts == TFloat) then ["fstore " ++ posicao i ts] else
+                       error ("Atribuição de algo tipo float para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
 
 toConst (Inteiro 0) = "iconst_0"
 toConst (Inteiro 1) = "iconst_1"

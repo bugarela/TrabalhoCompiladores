@@ -23,9 +23,10 @@ semanticaBlocoPrincipal (Main ds b) = let ts = semanticaDeclaracoes ds in (ts,se
 
 semanticaBloco ts cs = map (semanticaComando ts) cs
 
-semanticaComando ts (Atribui i (ParametroExpressao p)) = i ++ " = " ++ (unlines (semanticaExpressaoAritmetica ts p))
+semanticaComando ts (Atribui i (ParametroExpressao p)) = let (sea,t) = semanticaExpressaoAritmetica ts p in
+                                                            unlines (sea ++ store i t ts)
 semanticaComando _ _ = ""
 
 semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
 
-semanticaExpressaoAritmetica ts e = let (sea,_) = encontraCoercoes ts e in sea
+semanticaExpressaoAritmetica ts e = encontraCoercoes ts e
