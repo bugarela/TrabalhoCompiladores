@@ -36,6 +36,10 @@ store i TInt ts = if (tipoVariavel i ts == TFloat) then ["i2f","fstore " ++ posi
 store i TFloat ts = if (tipoVariavel i ts == TFloat) then ["fstore " ++ posicao i ts] else
                        error ("Atribuição de algo tipo float para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
 
+pre TInt = "i"
+pre TFloat = "f"
+pre TString = "naosei"
+
 toConst (Inteiro 0) = "iconst_0"
 toConst (Inteiro 1) = "iconst_1"
 toConst (Inteiro 2) = "iconst_2"
@@ -50,15 +54,25 @@ toConst (Flutuante n) = if (n >= -128 && n <= 127)
                            else "ldc " ++ show n
 
 encontraCoercoes :: TabelaDeSimbolos -> ExpressaoAritmetica -> ([[Char]], Tipo)
-encontraCoercoes ts (Multiplicacao a b) = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["imul"], t)
-encontraCoercoes ts (Divisao a b) =       let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["idiv"], t)
-encontraCoercoes ts (Adicao a b) =        let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["iadd"], t)
-encontraCoercoes ts (Subtracao a b) =     let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["isub"], t)
+encontraCoercoes ts (Multiplicacao a b) = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "mul"], t)
+encontraCoercoes ts (Divisao a b) =       let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "div"], t)
+encontraCoercoes ts (Adicao a b) =        let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "add"], t)
+encontraCoercoes ts (Subtracao a b) =     let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "sub"], t)
 encontraCoercoes ts (Neg a) =             let (sa,t) = encontraCoercoes ts a in (sa ++  ["/-/"],t)
 encontraCoercoes ts (Numero a) =          ([toConst a], tipoEA ts (Numero a))
-encontraCoercoes ts (Var i) =             (["iload " ++ posicao i ts], tipoEA ts (Var i))
+encontraCoercoes ts (Var i) =             ([pre t ++ "load " ++ posicao i ts], t) where t = tipoVariavel i ts
 
 coercaoExpr ts (a,TInt) (b,TInt) = (a,b,TInt)
 coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
 coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2F"],b,TFloat)
 coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2F"],TFloat)
+{-
+traduzComparacao (Maior a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["imul"], t)
+
+    Maior ExpressaoAritmetica ExpressaoAritmetica
+                             | Menor ExpressaoAritmetica ExpressaoAritmetica
+                             | MaiorIgual ExpressaoAritmetica ExpressaoAritmetica
+                             | MenorIgual ExpressaoAritmetica ExpressaoAritmetica
+                             | Igual ExpressaoAritmetica ExpressaoAritmetica
+                             | Diferente ExpressaoAritmetica ExpressaoAritmetica
+                             -}
