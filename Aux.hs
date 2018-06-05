@@ -52,6 +52,3 @@ coercaoExpr ts (a,TInt) (b,TInt) = (a,b,TInt)
 coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
 coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2F"],b,TFloat)
 coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2F"],TFloat)
-
-showLista [c] = c
-showLista (c:cs) = c ++ "\n" ++ showLista cs
