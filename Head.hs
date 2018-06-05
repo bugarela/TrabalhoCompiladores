@@ -2,6 +2,8 @@ module Head where
 
 import RBTree
 
+data LX a = LX (Int -> (a, Int))
+
 data Programa = Prog [DeclaracaoFuncao] BlocoPrincipal deriving(Show)
 
 data BlocoPrincipal = Main [Declaracao] Bloco deriving(Show)

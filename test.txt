@@ -3,15 +3,8 @@
     float d;
     string s1;
     a = 1 + 2;
-    a = c + 2;
     d = 1 + d;
     d = 1.0 - d;
-    d = 1.0 * 1;
-    d = a / 1.0;
     d = -(a + b) * 1.0;
-    if (a > d){
-        d = 1;
-    } else {
-        d = 2;
-    }
+
 }
