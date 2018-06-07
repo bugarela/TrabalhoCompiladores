@@ -16,8 +16,8 @@ instance Monad LX where
     return x = LX (\e -> (x, e))
     LX m >>= f  = LX (\e -> let (a, e') = m e; LX fa = f a in fa e')
 
-freshLabel :: LX String
-freshLabel = LX (\e -> let v = "L"++show e in (v, e+1))
+novoLabel :: LX String
+novoLabel = LX (\e -> let v = "L"++show e in (v, e+1))
 
 runLX (LX m) = let (t, _) = m 0 in t
 
@@ -55,6 +55,9 @@ store i TInt ts = if (tipoVariavel i ts == TFloat) then ["i2f","fstore " ++ posi
 store i TFloat ts = if (tipoVariavel i ts == TFloat) then ["fstore " ++ posicao i ts] else
                        error ("Atribuição de algo tipo float para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
 
+loadConst (Numb a) = toConst a
+loadConst (Str s) = "ldc " ++ show s
+
 pre TInt = "i"
 pre TFloat = "f"
 pre TString = "a"
@@ -81,8 +84,8 @@ encontraCoercoes ts (Var i) =             ([pre t ++ "load " ++ posicao i ts], t
 
 coercaoExpr ts (a,TInt) (b,TInt) = (a,b,TInt)
 coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
-coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2F"],b,TFloat)
-coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2F"],TFloat)
+coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2f"],b,TFloat)
+coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2f"],TFloat)
 
 traduzComparacao (Maior a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpgt"])
 traduzComparacao (Menor a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmplt"])

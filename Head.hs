@@ -70,6 +70,8 @@ data ExpressaoRelacional = Maior ExpressaoAritmetica ExpressaoAritmetica
 
 type TabelaDeSimbolos = RBTree (RelacaoTipo,Integer)
 
+data Java = Print
+
 instance Show Numeral where
   show (Inteiro i) = show i
   show (Flutuante f) = show f
