@@ -13,4 +13,8 @@ identa = map (\s -> '\t':s)
 
 getstatic Print = "getstatic java/lang/System/out Ljava/io/PrintStream;"
 
-invokevirtual Print = "invokevirtual java/io/PrintStream/println(I)V"
+invokevirtual Print t = "invokevirtual java/io/PrintStream/println(" ++ letra t ++ ")V"
+
+letra TInt = "I"
+letra TFloat = "F"
+letra TString = "Ljava/lang/String;"

@@ -9,7 +9,7 @@ import Head
 
 import Control.Monad.Identity (Identity)
 
-reservados = ",;.(){}"
+reservados = ",;.(){}\""
 
 ws = do {many (oneOf " \n"); return()}
 
@@ -216,7 +216,7 @@ listaId = identificador `sepBy` (char ',')
 literal = do try $ do n <- numero
                       return (Numb n)
           <|>
-          do try $ do {cs <- many1 (noneOf reservados); return (Str cs)}
+          do try $ do {char '\"'; cs <- many1 (noneOf reservados); char '\"'; return (Str cs)}
 
 atomoAritmetico = do {n <- numero; return (Numero n)}
                   <|>

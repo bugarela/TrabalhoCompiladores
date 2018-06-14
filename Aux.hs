@@ -34,7 +34,6 @@ insereTabelaSimbolos ((Decl t (i:is)):ds) ts p = if (busca ts ((i :>: t), p) /= 
                                                      then error ("Variavel " ++ show i ++ " duplamente declarada")
                                                      else insereTabelaSimbolos ((Decl t is):ds) (insere ts ((i :>: t),p)) (p+1)
 
-
 tipoEA _ (Numero (Inteiro _)) = TInt
 tipoEA _ (Numero (Flutuante _)) = TFloat
 tipoEA ts (Var i) = tipoVariavel i ts
@@ -47,7 +46,7 @@ tipoVariavel i ts = case busca ts ((i :>: TInt), 0) of
                          Nothing -> error("Variavel " ++ show i ++ " indefinida")
                          Just ((_ :>: t),_) -> t
 
-store i TString ts = if (tipoVariavel i ts == TString) then ["nseicomo " ++ posicao i ts] else
+store i TString ts = if (tipoVariavel i ts == TString) then ["astore " ++ posicao i ts] else
                          error ("Atribuição de algo tipo string para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
 store i TInt ts = if (tipoVariavel i ts == TFloat) then ["i2f","fstore " ++ posicao i ts] else
                   if (tipoVariavel i ts == TInt) then ["istore " ++ posicao i ts] else
@@ -57,6 +56,9 @@ store i TFloat ts = if (tipoVariavel i ts == TFloat) then ["fstore " ++ posicao 
 
 loadConst (Numb a) = toConst a
 loadConst (Str s) = "ldc " ++ show s
+
+tipoConst (Numb a) = tipoEA emptyRB (Numero a)
+tipoConst (Str s) = TString
 
 pre TInt = "i"
 pre TFloat = "f"
