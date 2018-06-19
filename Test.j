@@ -12,25 +12,12 @@
 	.limit stack 10
 	.limit locals 10
 
-	bipush 10
+	iconst_1
 	istore 1
 
-	bipush 20
-	istore 2
-
-	ldc 3.3
-	fstore 4
-
-	ldc "batata"
-	astore 5
-
-	getstatic java/lang/System/out Ljava/io/PrintStream;
-	ldc "a"
-	invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-
-	getstatic java/lang/System/out Ljava/io/PrintStream;
-	aload 5
-	invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+iload 1
+iconst_5
+if_icmpgt LX
 
 	return
 .end method

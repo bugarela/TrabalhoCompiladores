@@ -7,32 +7,42 @@ import SintaxeJasmin
 compila a = do ls <- parseFile a
                case ls of
                   Left e -> print e
-                  Right ls -> writeFile (nomeClasse a ++ ".j") (cabecalho a ++ (unlines ((snd (semanticaPrograma ls)))) ++ rodape)
+                  Right ls -> runLX (compila' a ls)
                return ()
 
-semanticaPrograma (Prog fs b) = semanticaBlocoPrincipal b-- e semanticaFuncoes de alguma forma
+compila' a ls = do (_,bs) <- semanticaPrograma ls
+                   return (writeFile (nomeClasse a ++ ".j") (cabecalho a ++ (unlines bs) ++ rodape))
+
+semanticaPrograma :: Programa -> LX (TabelaDeSimbolos, [String])
+semanticaPrograma (Prog fs b) = semanticaBlocoPrincipal b
 
 semanticaFuncoes = undefined
 
-semanticaBlocoPrincipal (Main ds b) = let ts = semanticaDeclaracoes ds in (ts,semanticaBloco ts b)
+semanticaBlocoPrincipal (Main ds b) = do let ts = semanticaDeclaracoes ds
+                                         bs <- semanticaBloco ts b
+                                         return (ts,bs)
 
-semanticaBloco ts cs = map (semanticaComando ts) cs ++ (identa ["return"])
+semanticaBloco ts cs = do bs <- mapM (semanticaComando ts) cs
+                          let r = identa ["return"]
+                          return (bs ++ r)
 
-semanticaComando ts (Atribui i (ParametroExpressao p)) = let (sea,t) = semanticaExpressaoAritmetica ts p in
-                                                            unlines (identa (sea ++ store i t ts))
-semanticaComando ts (Atribui i (ParametroLiteral l)) = unlines (identa ((fst (empilha ts (ParametroLiteral l))) ++ (store i (tipoConst l) ts)))
-semanticaComando ts (If e b1 b2) = unlines (init se ++ ["if_" ++ (last se) ++ " LX"]) where
-                                     se = semanticaExpressaoLogica ts e
+semanticaComando ts (Atribui i (ParametroExpressao p)) = do let (sea,t) = semanticaExpressaoAritmetica ts p
+                                                            return (unlines (identa (sea ++ store i t ts)))
 
-semanticaComando ts (Escreve a) = unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)]))
-                                    where p = empilha ts a
-semanticaComando _ _ = ""
+semanticaComando ts (Atribui i (ParametroLiteral l)) = return (unlines (identa ((fst (empilha ts (ParametroLiteral l))) ++ (store i (tipoConst l) ts))))
+
+semanticaComando ts (If e b1 b2) = do se <- semanticaExpressaoLogica ts e
+                                      return (unlines (init se ++ ["if_" ++ (last se) ++ " LX"]))
+
+semanticaComando ts (Escreve a) = do let p = empilha ts a
+                                     return (unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)])))
+semanticaComando _ _ = return ""
 
 semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
 
 semanticaExpressaoLogica ts (ER e) = semanticaExpressaoRelacional ts e
 
-semanticaExpressaoRelacional ts e = traduzComparacao e ts
+semanticaExpressaoRelacional ts e = desvios ts e
 
 semanticaExpressaoAritmetica ts e = encontraCoercoes ts e
 
@@ -42,5 +52,7 @@ empilha ts (ParametroExpressao e) = (semanticaExpressaoAritmetica ts e)
 testeTabelaDeSimbolos a = do ls <- parseFile a
                              case ls of
                                Left e -> print e
-                               Right ls -> print (fst (semanticaPrograma ls))
+                               Right ls -> runLX (testeTabelaDeSimbolos' ls)
                              return ()
+testeTabelaDeSimbolos' ls = do (p,_) <- semanticaPrograma ls
+                               return (print p)

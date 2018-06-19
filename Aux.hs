@@ -27,7 +27,7 @@ busca = searchFast compVar
 insere = insert compVar
 compVar ((a :>: _),_) ((b :>: _),_) = compare a b
 
-insereTabelaSimbolos :: [Declaracao] -> TabelaDeSimbolos -> Integer -> TabelaDeSimbolos
+--insereTabelaSimbolos :: [Declaracao] -> TabelaDeSimbolos -> Integer -> TabelaDeSimbolos
 insereTabelaSimbolos [] ts p = ts
 insereTabelaSimbolos ((Decl t []):ds) ts p = insereTabelaSimbolos ds ts p
 insereTabelaSimbolos ((Decl t (i:is)):ds) ts p = if (busca ts ((i :>: t), p) /= Nothing)
@@ -89,9 +89,24 @@ coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
 coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2f"],b,TFloat)
 coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2f"],TFloat)
 
-traduzComparacao (Maior a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpgt"])
-traduzComparacao (Menor a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmplt"])
-traduzComparacao (MaiorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpge"])
-traduzComparacao (MenorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmple"])
-traduzComparacao (Igual a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpeq"])
-traduzComparacao (Diferente a b) ts =  let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "cmpne"])
+traduzComparacao (Maior a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpgt"])
+traduzComparacao (Menor a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmplt"])
+traduzComparacao (MaiorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpge"])
+traduzComparacao (MenorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmple"])
+traduzComparacao (Igual a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpeq"])
+traduzComparacao (Diferente a b) ts =  let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpne"])
+-- arrumar pra ponto Flutuante
+
+desvios ts (E a b) le = do la <- freshLabel
+                           lb <- freshLabel
+                           let da = (desvios ts a la)
+                               db = (desvios ts b lb)
+                           return (da ++ ["goto " ++ le] ++ [la ++ ":"] ++ db ++ ["goto " ++ le] ++ [lb ++ ":"])
+
+desvios ts (Ou a b) le = do l <- freshLabel
+                            let da = (desvios ts a l)
+                                db = (desvios ts b l)
+                               return (da ++ db ++ ["goto " ++ le] ++ [la ++ ":"])
+
+desvios ts (ER e) l = do let se = traduzComparacao ts e
+                          return ((unlines (init se ++ [(last se) ++ " " ++ l])),l)
