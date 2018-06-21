@@ -15,24 +15,33 @@
 	iconst_1
 	istore 1
 
-	iload 1
-	iconst_5
-	if_icmpgt L0
-	goto L1
-L0:
-	iconst_1
-	istore 2
+	bipush 50
+	i2f
+	fstore 4
 
-	goto L2
-L1:
-	iconst_2
+	iconst_4
 	istore 2
 
 L2:
+	fload 4
+	bipush 100
+	i2f
+	fcmpl
+	iflt L0
+	goto L1
+L0:
+	fload 4
+	iconst_1
+	i2f
+	fadd
+	fstore 4
+
+	goto L2
+L1:
 
 	getstatic java/lang/System/out Ljava/io/PrintStream;
-	iload 2
-	invokevirtual java/io/PrintStream/println(I)V
+	fload 4
+	invokevirtual java/io/PrintStream/println(F)V
 
 	return
 .end method

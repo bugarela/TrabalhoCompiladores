@@ -31,11 +31,23 @@ semanticaComando ts (Atribui i (ParametroExpressao p)) = do let (sea,t) = semant
 
 semanticaComando ts (Atribui i (ParametroLiteral l)) = return (unlines (identa ((fst (empilha ts (ParametroLiteral l))) ++ (store i (tipoConst l) ts))))
 
+semanticaComando ts (If e b1 []) = do (se,lf) <- semanticaExpressaoLogica ts e
+                                      s1 <- semanticaBloco ts b1
+                                      return (unlines (se ++ s1 ++ [lf ++ ":"]))
+
 semanticaComando ts (If e b1 b2) = do (se,lf) <- semanticaExpressaoLogica ts e
                                       laux <- novoLabel
                                       s1 <- semanticaBloco ts b1
                                       s2 <- semanticaBloco ts b2
-                                      return (unlines (se ++ s1 ++ identa (goto laux) ++ [lf ++ ":"] ++ s2 ++ [laux ++ ":"]))
+                                      let r = se ++ s1 ++ identa (goto laux) ++ [lf ++ ":"] ++ s2 ++ [laux ++ ":"]
+                                      return (unlines r)
+
+semanticaComando ts (While e b) = do (se,lf) <- semanticaExpressaoLogica ts e
+                                     lw <- novoLabel
+                                     lb <- novoLabel
+                                     s <- semanticaBloco ts b
+                                     let r = [lw ++ ":"] ++ se ++ s ++ identa (goto lw) ++ [lf ++ ":"]
+                                     return (unlines r)
 
 semanticaComando ts (Escreve a) = do let p = empilha ts a
                                      return (unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)])))

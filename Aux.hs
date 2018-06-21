@@ -92,12 +92,15 @@ coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2f"],TFloat)
 
 coercao ts a b = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b)
 
-traduzComparacao ts (Maior a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpgt")
-traduzComparacao ts (Menor a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmplt")
-traduzComparacao ts (MaiorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpge")
-traduzComparacao ts (MenorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmple")
-traduzComparacao ts (Igual a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpeq")
-traduzComparacao ts (Diferente a b) =  let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpne")
+geraIf TInt s = "if_icmp" ++ s
+geraIf TFloat s = "fcmpl\n\tif" ++ s
+
+traduzComparacao ts (Maior a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "gt")
+traduzComparacao ts (Menor a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "lt")
+traduzComparacao ts (MaiorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "ge")
+traduzComparacao ts (MenorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "le")
+traduzComparacao ts (Igual a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "eq")
+traduzComparacao ts (Diferente a b) =  let (sa,sb,t) = coercao ts a b in (sa ++ sb, geraIf t "ne")
 -- arrumar pra ponto Flutuante
 
 desvios ts (E a b) lv lf = do laux <- novoLabel

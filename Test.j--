@@ -3,10 +3,10 @@
     float d;
     string s1;
     a = 1;
-    if (a > 5){
-        b = 1;
-    } else {
-        b = 2;
+    d = 50;
+    b = 4;
+    while (d < 100){
+        d = d + 1;
     }
-    print(b);
+    print(d);
 }
