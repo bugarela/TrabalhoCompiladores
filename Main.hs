@@ -20,19 +20,22 @@ semanticaFuncoes = undefined
 
 semanticaBlocoPrincipal (Main ds b) = do let ts = semanticaDeclaracoes ds
                                          bs <- semanticaBloco ts b
-                                         return (ts,bs)
+                                         let r = identa ["return"]
+                                         return (ts,bs ++ r)
 
 semanticaBloco ts cs = do bs <- mapM (semanticaComando ts) cs
-                          let r = identa ["return"]
-                          return (bs ++ r)
+                          return (bs)
 
 semanticaComando ts (Atribui i (ParametroExpressao p)) = do let (sea,t) = semanticaExpressaoAritmetica ts p
                                                             return (unlines (identa (sea ++ store i t ts)))
 
 semanticaComando ts (Atribui i (ParametroLiteral l)) = return (unlines (identa ((fst (empilha ts (ParametroLiteral l))) ++ (store i (tipoConst l) ts))))
 
-semanticaComando ts (If e b1 b2) = do se <- semanticaExpressaoLogica ts e
-                                      return (unlines (init se ++ ["if_" ++ (last se) ++ " LX"]))
+semanticaComando ts (If e b1 b2) = do (se,lf) <- semanticaExpressaoLogica ts e
+                                      laux <- novoLabel
+                                      s1 <- semanticaBloco ts b1
+                                      s2 <- semanticaBloco ts b2
+                                      return (unlines (se ++ s1 ++ identa (goto laux) ++ [lf ++ ":"] ++ s2 ++ [laux ++ ":"]))
 
 semanticaComando ts (Escreve a) = do let p = empilha ts a
                                      return (unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)])))
@@ -40,9 +43,10 @@ semanticaComando _ _ = return ""
 
 semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
 
-semanticaExpressaoLogica ts (ER e) = semanticaExpressaoRelacional ts e
-
-semanticaExpressaoRelacional ts e = desvios ts e
+semanticaExpressaoLogica ts e = do lv <- novoLabel
+                                   lf <- novoLabel
+                                   se <- desvios ts e lv lf
+                                   return (se ++ [lv ++ ":"],lf)
 
 semanticaExpressaoAritmetica ts e = encontraCoercoes ts e
 

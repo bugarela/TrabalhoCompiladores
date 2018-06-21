@@ -15,9 +15,24 @@
 	iconst_1
 	istore 1
 
-iload 1
-iconst_5
-if_icmpgt LX
+	iload 1
+	iconst_5
+	if_icmpgt L0
+	goto L1
+L0:
+	iconst_1
+	istore 2
+
+	goto L2
+L1:
+	iconst_2
+	istore 2
+
+L2:
+
+	getstatic java/lang/System/out Ljava/io/PrintStream;
+	iload 2
+	invokevirtual java/io/PrintStream/println(I)V
 
 	return
 .end method

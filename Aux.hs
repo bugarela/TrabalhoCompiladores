@@ -3,6 +3,7 @@ module Aux where
 import Parser
 import Head
 import RBTree
+import SintaxeJasmin
 
 --------------------------
 instance Functor LX where
@@ -76,10 +77,10 @@ toConst (Inteiro n) = if (n >= -128 && n <= 127)
 toConst (Flutuante n) = "ldc " ++ show n
 
 encontraCoercoes :: TabelaDeSimbolos -> ExpressaoAritmetica -> ([[Char]], Tipo)
-encontraCoercoes ts (Multiplicacao a b) = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "mul"], t)
-encontraCoercoes ts (Divisao a b) =       let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "div"], t)
-encontraCoercoes ts (Adicao a b) =        let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "add"], t)
-encontraCoercoes ts (Subtracao a b) =     let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ [pre t ++ "sub"], t)
+encontraCoercoes ts (Multiplicacao a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb ++ [pre t ++ "mul"], t)
+encontraCoercoes ts (Divisao a b) =       let (sa,sb,t) = coercao ts a b in (sa ++ sb ++ [pre t ++ "div"], t)
+encontraCoercoes ts (Adicao a b) =        let (sa,sb,t) = coercao ts a b in (sa ++ sb ++ [pre t ++ "add"], t)
+encontraCoercoes ts (Subtracao a b) =     let (sa,sb,t) = coercao ts a b in (sa ++ sb ++ [pre t ++ "sub"], t)
 encontraCoercoes ts (Neg a) =             let (sa,t) = encontraCoercoes ts a in (sa ++ [pre t ++ "neg"],t)
 encontraCoercoes ts (Numero a) =          ([toConst a], tipoEA ts (Numero a))
 encontraCoercoes ts (Var i) =             ([pre t ++ "load " ++ posicao i ts], t) where t = tipoVariavel i ts
@@ -89,24 +90,27 @@ coercaoExpr ts (a,TFloat) (b,TFloat) = (a,b,TFloat)
 coercaoExpr ts (a,TInt) (b,TFloat) = (a ++ ["i2f"],b,TFloat)
 coercaoExpr ts (a,TFloat) (b,TInt) = (a,b ++ ["i2f"],TFloat)
 
-traduzComparacao (Maior a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpgt"])
-traduzComparacao (Menor a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmplt"])
-traduzComparacao (MaiorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpge"])
-traduzComparacao (MenorIgual a b) ts = let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmple"])
-traduzComparacao (Igual a b) ts =      let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpeq"])
-traduzComparacao (Diferente a b) ts =  let (sa,sb,t) = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b) in (sa ++ sb ++ ["if_" ++ pre t ++ "cmpne"])
+coercao ts a b = coercaoExpr ts (encontraCoercoes ts a) (encontraCoercoes ts b)
+
+traduzComparacao ts (Maior a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpgt")
+traduzComparacao ts (Menor a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmplt")
+traduzComparacao ts (MaiorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpge")
+traduzComparacao ts (MenorIgual a b) = let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmple")
+traduzComparacao ts (Igual a b) =      let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpeq")
+traduzComparacao ts (Diferente a b) =  let (sa,sb,t) = coercao ts a b in (sa ++ sb, "if_" ++ pre t ++ "cmpne")
 -- arrumar pra ponto Flutuante
 
-desvios ts (E a b) le = do la <- freshLabel
-                           lb <- freshLabel
-                           let da = (desvios ts a la)
-                               db = (desvios ts b lb)
-                           return (da ++ ["goto " ++ le] ++ [la ++ ":"] ++ db ++ ["goto " ++ le] ++ [lb ++ ":"])
+desvios ts (E a b) lv lf = do laux <- novoLabel
+                              da <- desvios ts a laux lf
+                              db <- desvios ts b lv lf
+                              return (da ++ [laux ++ ":"] ++ db)
 
-desvios ts (Ou a b) le = do l <- freshLabel
-                            let da = (desvios ts a l)
-                                db = (desvios ts b l)
-                               return (da ++ db ++ ["goto " ++ le] ++ [la ++ ":"])
+desvios ts (Ou a b) lv lf = do laux <- novoLabel
+                               da <- desvios ts a lv laux
+                               db <- desvios ts b lv lf
+                               return (da ++ [laux ++ ":"] ++ db)
 
-desvios ts (ER e) l = do let se = traduzComparacao ts e
-                          return ((unlines (init se ++ [(last se) ++ " " ++ l])),l)
+desvios ts (Nao e) lv lf = desvios ts e lf lv
+
+desvios ts (ER e) lv lf = do let (se,c) = traduzComparacao ts e
+                             return (identa (se ++ [c ++ " " ++ lv] ++ goto lf))

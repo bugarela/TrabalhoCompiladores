@@ -18,3 +18,5 @@ invokevirtual Print t = "invokevirtual java/io/PrintStream/println(" ++ letra t 
 letra TInt = "I"
 letra TFloat = "F"
 letra TString = "Ljava/lang/String;"
+
+goto l = ["goto " ++ l]
