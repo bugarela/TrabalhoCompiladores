@@ -1,5 +1,7 @@
 import Aux
 import Head
+import Tabelas
+import JVM
 import Parser
 import RBTree
 import SintaxeJasmin
@@ -60,7 +62,7 @@ semanticaExpressaoLogica ts e = do lv <- novoLabel
                                    se <- desvios ts e lv lf
                                    return (se ++ [lv ++ ":"],lf)
 
-semanticaExpressaoAritmetica ts e = encontraCoercoes ts e
+semanticaExpressaoAritmetica ts e = traduzExpr ts e
 
 empilha ts (ParametroLiteral l) = ([loadConst l], tipoConst l)
 empilha ts (ParametroExpressao e) = (semanticaExpressaoAritmetica ts e)
