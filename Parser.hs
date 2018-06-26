@@ -38,18 +38,18 @@ operadoresLogicos = [[Prefix (char '!' >> ws >> return (Nao))],
                      [Infix  (string "&&" >> ws >> return (E)) AssocLeft,
                       Infix  (string "||" >> ws >> return (Ou)) AssocLeft]]
 
---operadoresRelacionais :: [[Operator String u m ExpressaoRelacional]]
-operadoresRelacionais = (char '>' >> ws >> return (Maior))
+operadoresRelacionais = do try $ (string ">=" >> ws >> return (MaiorIgual))
+                        <|>
+                        do try $ (string "<=" >> ws >> return (MenorIgual))
+                        <|>
+                        (char '>' >> ws >> return (Maior))
                         <|>
                         (char '<' >> ws >> return (Menor))
-                        <|>
-                        (string ">=" >> ws >> return (MaiorIgual))
-                        <|>
-                        (string "<=" >> ws >> return (MenorIgual))
                         <|>
                         (string "==" >> ws >> return (Igual))
                         <|>
                         (string "!=" >> ws >> return (Diferente))
+
 
 expressaoRelacional = do try $ do l <- expressaoAritmetica
                                   ws
@@ -149,6 +149,8 @@ retorno = do string "return "
              ws
              p <- parametro
              ws
+             char ';'
+             ws
              return (Ret p)
 
 comando = cmdSe <|> cmdEnquanto <|> cmdAtrib <|> cmdEscrita <|> cmdLeitura <|> chamadaProc <|> retorno
@@ -195,8 +197,13 @@ declParametros = parametroFormal `sepBy` (char ',')
 
 funcao = do try $ do tr <- tipoRetorno
                      i <- identificador
+                     char '('
+                     ws
                      ps <- declParametros
+                     char ')'
+                     ws
                      b <- blocoPrincipal
+                     ws
                      return (Funcao tr i ps b)
 
 programa = do fs <- many funcao

@@ -19,4 +19,11 @@ letra TInt = "I"
 letra TFloat = "F"
 letra TString = "Ljava/lang/String;"
 
+letras ls = foldr1 (++) (map letra ls)
+
+letraR (R l) = letra l
+letraR (Void) = "V"
+
 goto l = ["goto " ++ l]
+
+cabecalhoFuncao nome ls r = ".method public static " ++ nome ++ "(" ++ letras ls ++ "):" ++ letraR r

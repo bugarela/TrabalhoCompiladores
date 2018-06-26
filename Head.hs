@@ -20,14 +20,14 @@ data Tipo = TInt | TString | TFloat deriving (Eq)
 
 data RelacaoTipo = Identificador :>: Tipo deriving (Eq, Show)
 
-data Retorno = R Tipo | Void deriving(Show)
+data Retorno = R Tipo | Void deriving(Show,Eq)
 
 data DeclaracaoFuncao = Funcao Retorno Identificador DeclParametros BlocoPrincipal deriving(Show)
 
 data ChamadaFuncao = Chamada Identificador ListaParametros deriving(Show)
 
 type DeclParametros = [ParametroFormal]
-data ParametroFormal = ParamFormal Tipo Identificador deriving(Show)
+data ParametroFormal = ParamFormal Tipo Identificador deriving(Show,Eq)
 
 type ListaParametros = [Parametro]
 data Parametro = ParametroLiteral Literal
@@ -70,6 +70,8 @@ data ExpressaoRelacional = Maior ExpressaoAritmetica ExpressaoAritmetica
                          deriving (Show)
 
 type TabelaDeSimbolos = RBTree (RelacaoTipo,Integer)
+
+type TabelaDeFuncoes = RBTree (Identificador,Retorno,DeclParametros)
 
 data Java = Print
 

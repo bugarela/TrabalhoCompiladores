@@ -3,12 +3,11 @@ module Tabelas where
 import Head
 import RBTree
 
+-- Tabela de Símbolos
+
 busca = searchFast compVar
 insere = insert compVar
 compVar ((a :>: _),_) ((b :>: _),_) = compare a b
-
-----------------------------
--- Tabela de Símbolos
 
 insereTabelaSimbolos :: [Declaracao] -> TabelaDeSimbolos -> Integer -> TabelaDeSimbolos
 insereTabelaSimbolos [] ts p = ts
@@ -26,3 +25,17 @@ tipoVariavel i ts = case busca ts ((i :>: TInt), 0) of
                       Just ((_ :>: t),_) -> t
 
 -- Tabela de Funções
+-- nome da funcao | retorno | lista de parametros -->
+
+buscaFun = searchFast compFun
+insereFun = insert compFun
+
+compFun :: (Identificador,Retorno,DeclParametros) -> (Identificador,Retorno,DeclParametros) -> Ordering
+compFun (a,_,_) (b,_,_) = compare a b
+
+--Funcao Retorno Identificador DeclParametros BlocoPrincipal
+insereTabelaFuncoes :: [DeclaracaoFuncao] -> TabelaDeFuncoes -> TabelaDeFuncoes
+insereTabelaFuncoes [] tf = tf
+insereTabelaFuncoes ((Funcao r i ps _):ds) tf = if (buscaFun tf (i,Void,[]) /= Nothing)
+                                                 then error ("Funcao " ++ show i ++ " duplamente declarada")
+                                                 else insereTabelaFuncoes ds (insereFun tf (i,r,ps))

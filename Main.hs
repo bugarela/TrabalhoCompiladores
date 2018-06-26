@@ -16,17 +16,18 @@ compila' a ls = do (_,bs) <- semanticaPrograma ls
                    return (writeFile (nomeClasse a ++ ".j") (cabecalho a ++ (unlines bs) ++ rodape))
 
 semanticaPrograma :: Programa -> LX (TabelaDeSimbolos, [String])
-semanticaPrograma (Prog fs b) = semanticaBlocoPrincipal b
+semanticaPrograma (Prog fs b) = let tf = semanticaDeclFuncoes fs in semanticaBlocoPrincipal tf b
 
 semanticaFuncoes = undefined
 
-semanticaBlocoPrincipal (Main ds b) = do let ts = semanticaDeclaracoes ds
-                                         bs <- semanticaBloco ts b
-                                         let r = identa ["return"]
-                                         return (ts,bs ++ r)
+semanticaBlocoPrincipal tf (Main ds b) = do let ts = semanticaDeclaracoes ds
+                                            bs <- semanticaBloco ts tr b
+                                            let r = identa ["return"]
+                                            return (ts,bs ++ r)
 
-semanticaBloco ts cs = do bs <- mapM (semanticaComando ts) cs
-                          return (bs)
+-- tr a partir daqui
+semanticaBloco ts tr cs = do bs <- mapM (semanticaComando ts tr) cs
+                             return (bs)
 
 semanticaComando ts (Atribui i (ParametroExpressao p)) = do let (sea,t) = semanticaExpressaoAritmetica ts p
                                                             return (unlines (identa (sea ++ store i t ts)))
