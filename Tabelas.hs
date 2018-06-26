@@ -10,7 +10,7 @@ insere = insert compVar
 compVar ((a :>: _),_) ((b :>: _),_) = compare a b
 
 insereTabelaSimbolos :: [Declaracao] -> TabelaDeSimbolos -> Integer -> TabelaDeSimbolos
-insereTabelaSimbolos [] ts p = ts
+insereTabelaSimbolos [] ts _ = ts
 insereTabelaSimbolos ((Decl t []):ds) ts p = insereTabelaSimbolos ds ts p
 insereTabelaSimbolos ((Decl t (i:is)):ds) ts p = if (busca ts ((i :>: t), p) /= Nothing)
                                                      then error ("Variavel " ++ show i ++ " duplamente declarada")

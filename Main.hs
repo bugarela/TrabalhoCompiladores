@@ -5,6 +5,7 @@ import JVM
 import Parser
 import RBTree
 import SintaxeJasmin
+import Data.List
 
 compila a = do ls <- parseFile a
                case ls of
@@ -13,20 +14,26 @@ compila a = do ls <- parseFile a
                return ()
 
 compila' a ls = do (_,_,bs) <- semanticaPrograma ls
-                   return (writeFile (nomeClasse a ++ ".j") (cabecalho a ++ (unlines bs) ++ rodape))
+                   return (writeFile (nomeClasse a ++ ".j") (cabecalho a ++ bs))
 
-semanticaPrograma :: Programa -> LX (TabelaDeSimbolos, TabelaDeFuncoes, [String])
-semanticaPrograma (Prog fs b) = let tf = semanticaDeclFuncoes fs in semanticaBlocoPrincipal tf b
+semanticaPrograma :: Programa -> LX (TabelaDeSimbolos, TabelaDeFuncoes, String)
+semanticaPrograma (Prog fs b) = do (tf,fs) <- semanticaDeclFuncoes fs
+                                   (ts,tf,bs) <- semanticaBlocoPrincipal tf b
+                                   let cabecalhoMain = cabecalhoFuncao "main" [TString] Void
+                                   return (ts,tf,fs ++ (cabecalhoMain ++ (unlines bs) ++ rodape))
 
-semanticaFuncoes = undefined
+semanticaBlocoFuncao ts tf (Main ds b) n = do let ts' = insereTabelaSimbolos ds ts n
+                                              bs <- semanticaBloco ts' tf b
+                                              let r = adicionaRetorno bs
+                                              return r
 
 semanticaBlocoPrincipal tf (Main ds b) = do let ts = semanticaDeclaracoes ds
                                             bs <- semanticaBloco ts tf b
-                                            let r = identa ["return"]
-                                            return (ts,tf,bs ++ r)
+                                            let r = adicionaRetorno bs
+                                            return (ts,tf,r)
 
 semanticaBloco ts tf cs = do bs <- mapM (semanticaComando ts tf) cs
-                             return (bs)
+                             return bs
 
 semanticaComando ts tf (Atribui i (ParametroExpressao p)) = do let (sea,t) = semanticaExpressaoAritmetica ts p
                                                                return (unlines (identa (sea ++ store i t ts)))
@@ -57,10 +64,23 @@ semanticaComando ts tf (Escreve a) = do let p = empilha ts a
                                         return (unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)])))
 
 semanticaComando ts tf (ChamadaProc a) = undefined
+
+semanticaComando ts tf (Ret a) = do let (p,t) = empilha ts a
+                                        r = pre t ++ "return "
+                                    return (unlines (identa (p ++ [r])))
+
 semanticaComando _ _ _ = return ""
 
 semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
-semanticaDeclFuncoes df = insereTabelaFuncoes df emptyRB
+semanticaDeclFuncoes df = do let tf = insereTabelaFuncoes df emptyRB
+                             fs <- mapM (traduzFuncao tf) df
+                             return (tf, fold fs)
+
+traduzFuncao tf (Funcao r i ps b) = do let c = cabecalhoFuncao i (map assinatura ps) r
+                                           ds = map declaraParametro ps
+                                           ts = insereTabelaSimbolos ds emptyRB 0
+                                       sb <- semanticaBlocoFuncao ts tf b (toInteger(length ds))
+                                       return (c ++ (unlines sb) ++ rodape)
 
 semanticaExpressaoLogica ts e = do lv <- novoLabel
                                    lf <- novoLabel
@@ -71,6 +91,11 @@ semanticaExpressaoAritmetica ts e = traduzExpr ts e
 
 empilha ts (ParametroLiteral l) = ([loadConst l], tipoConst l)
 empilha ts (ParametroExpressao e) = (semanticaExpressaoAritmetica ts e)
+
+adicionaRetorno bs = if ("return" `isInfixOf` last bs) then bs else (bs ++ identa ["return"])
+
+
+--------- Testes --------
 
 testeTabelaDeSimbolos a = do ls <- parseFile a
                              case ls of

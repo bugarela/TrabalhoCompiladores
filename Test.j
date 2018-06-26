@@ -8,7 +8,21 @@
 	return
 .end method
 
-.method public static main([Ljava/lang/String;)V
+.method public static f(II)I
+	.limit stack 10
+	.limit locals 10
+
+	iload 0
+	iload 1
+	iadd
+	istore 0
+
+	iload 0
+	ireturn 
+
+.end method
+
+.method public static main(Ljava/lang/String;)V
 	.limit stack 10
 	.limit locals 10
 
@@ -40,3 +54,4 @@ L1:
 
 	return
 .end method
+

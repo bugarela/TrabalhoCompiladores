@@ -45,3 +45,10 @@ desvios ts (Nao e) lv lf = desvios ts e lf lv
 
 desvios ts (ER e) lv lf = do let (se,c) = traduzComparacao ts e
                              return (identa (se ++ [c ++ " " ++ lv] ++ goto lf))
+
+assinatura (ParamFormal t i) = t
+
+organizaParametros [] _ = []
+organizaParametros ((ParamFormal t i):ps) e = (i:>:t,e):organizaParametros ps (e+1)
+
+declaraParametro (ParamFormal t i) = Decl t [i]

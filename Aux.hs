@@ -56,3 +56,6 @@ toConst (Inteiro n) = if (n >= -128 && n <= 127)
                          then "bipush " ++ show n
                          else "ldc " ++ show n
 toConst (Flutuante n) = "ldc " ++ show n
+
+fold [] = []
+fold (f:fs) = f ++ fold fs
