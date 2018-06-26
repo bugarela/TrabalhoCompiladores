@@ -32,7 +32,7 @@ data ParametroFormal = ParamFormal Tipo Identificador deriving(Show,Eq)
 type ListaParametros = [Parametro]
 data Parametro = ParametroLiteral Literal
                | ParametroExpressao ExpressaoAritmetica
-               -- chamada de funcao
+               | ParametroFuncao ChamadaFuncao
                deriving(Show)
 
 data Declaracao = Decl Tipo [Identificador] deriving(Show)

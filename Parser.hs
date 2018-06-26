@@ -62,7 +62,9 @@ listaParametros = parametro `sepBy` (char ',')
 
 parametro = do {e <- expressaoAritmetica; ws; return (ParametroExpressao e)}
             <|>
-            do {l <- literal; ws; return (ParametroLiteral l)}
+            do try $ do {l <- literal; ws; return (ParametroLiteral l)}
+            <|>
+            do {f <- chamadaFuncao; ws; return (ParametroFuncao f)}
 
 chamadaFuncao = do try $ do i <-identificador
                             ws
