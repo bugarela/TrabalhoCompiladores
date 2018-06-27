@@ -8,7 +8,7 @@
 	return
 .end method
 
-.method public static f(II)I
+.method public static f(II)F
 	.limit stack 10
 	.limit locals 10
 
@@ -17,9 +17,8 @@
 	iadd
 	istore 0
 
-	iload 0
-	ireturn 
-
+	i2f
+	freturn
 .end method
 
 .method public static main([Ljava/lang/String;)V
@@ -27,24 +26,26 @@
 	.limit locals 10
 
 	iconst_1
-	istore 1
+	i2f
+	fstore 1
 
 	iconst_2
-	istore 2
+	i2f
+	fstore 2
 
-	iload 1
-
-
-iload 2
+	iconst_1
 
 
+iconst_2
 
-	invokestatic Test.f(II)I
-	istore 1
+
+
+	invokestatic Test.f(II)F
+	fstore 1
 
 	getstatic java/lang/System/out Ljava/io/PrintStream;
-	iload 1
-	invokevirtual java/io/PrintStream/println(I)V
+	fload 1
+	invokevirtual java/io/PrintStream/println(F)V
 
 	return
 .end method

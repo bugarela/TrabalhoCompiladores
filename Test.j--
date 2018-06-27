@@ -1,13 +1,13 @@
-int f(int a,int b){
+float f(int a,int b){
     a = a + b;
     return a;
 }
 
 {
-    int c,d;
+    float c,d;
     c = 1;
     d = 2;
-    c = f(c,d);
+    c = f(1,2);
     print(c);
 
 }

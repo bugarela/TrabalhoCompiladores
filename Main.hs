@@ -24,8 +24,7 @@ semanticaPrograma a (Prog fs b) = do (tf,fs) <- semanticaDeclFuncoes fs a
 
 semanticaBlocoFuncao ts tf (Main ds b) n = do let ts' = insereTabelaSimbolos ds ts n
                                               bs <- semanticaBloco ts' tf b
-                                              let r = adicionaRetorno bs
-                                              return r
+                                              return bs
 
 semanticaBlocoPrincipal tf (Main ds b) = do let ts = semanticaDeclaracoes ds
                                             bs <- semanticaBloco ts tf b
@@ -65,7 +64,7 @@ semanticaComando ts tf (ChamadaProc c) = do let (s,_) = (traduzChamadaFuncao ts 
                                             return (unlines (identa s))
 
 semanticaComando ts tf (Ret a) = do let (p,t) = empilha ts tf a
-                                        r = pre t ++ "return "
+                                        r = pre t ++ "return"
                                     return (unlines (identa (p ++ [r])))
 
 semanticaComando _ _ _ = return ""
@@ -79,7 +78,8 @@ traduzFuncao tf (Funcao r i ps b) = do let c = cabecalhoFuncao i (map assinatura
                                            ds = map declaraParametro ps
                                            ts = insereTabelaSimbolos ds emptyRB 0
                                        sb <- semanticaBlocoFuncao ts tf b (toInteger(length ds))
-                                       return (c ++ (unlines sb) ++ rodape)
+                                       let sb' = verificaRetorno r (adicionaRetorno sb)
+                                       return (c ++ (unlines sb') ++ rodape)
 
 semanticaExpressaoLogica ts tf e = do lv <- novoLabel
                                       lf <- novoLabel
@@ -90,7 +90,12 @@ semanticaExpressaoAritmetica ts tf e = traduzExpr ts tf e
 
 adicionaRetorno bs = if ("return" `isInfixOf` last bs) then bs else (bs ++ identa ["return"])
 
-
+verificaRetorno Void bs = if "\treturn\n" `isSuffixOf` last bs then bs else error ("Retorno encontrado em função para void")
+verificaRetorno (R TInt) bs = if "\tireturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser inteiro")
+verificaRetorno (R TString) bs = if "\tareturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser string")
+verificaRetorno (R TFloat) bs = if "\tireturn\n" `isSuffixOf` last bs
+                                then (init bs) ++ identa(["i2f"] ++ ["freturn"])
+                                else if "\tfreturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser float")
 --------- Testes --------
 
 testeTabelaDeSimbolos a = do ls <- parseFile a
