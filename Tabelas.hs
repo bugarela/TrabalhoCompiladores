@@ -39,3 +39,9 @@ insereTabelaFuncoes [] tf = tf
 insereTabelaFuncoes ((Funcao r i ps _):ds) tf = if (buscaFun tf (i,Void,[]) /= Nothing)
                                                  then error ("Funcao " ++ show i ++ " duplamente declarada")
                                                  else insereTabelaFuncoes ds (insereFun tf (i,r,ps))
+
+tipoParam (ParamFormal t _) = t
+
+buscaTipos i (tf,a) = case buscaFun tf (i,Void,[]) of
+                           Nothing -> error("Funcao " ++ show i ++ " indefinida")
+                           Just (_,r,p) -> (a ++ "." ++ i,r, map tipoParam p)

@@ -57,5 +57,8 @@ toConst (Inteiro n) = if (n >= -128 && n <= 127)
                          else "ldc " ++ show n
 toConst (Flutuante n) = "ldc " ++ show n
 
+tipoRet (R t) = t
+tipoRet (Void) = error("Operacao com funcao que retorna void")
+
 fold [] = []
 fold (f:fs) = f ++ fold fs

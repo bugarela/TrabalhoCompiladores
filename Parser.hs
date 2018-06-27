@@ -62,12 +62,9 @@ listaParametros = parametro `sepBy` (char ',')
 
 parametro = do {e <- expressaoAritmetica; ws; return (ParametroExpressao e)}
             <|>
-            do try $ do {l <- literal; ws; return (ParametroLiteral l)}
-            <|>
-            do {f <- chamadaFuncao; ws; return (ParametroFuncao f)}
+            do {l <- literal; ws; return (ParametroLiteral l)}
 
-chamadaFuncao = do try $ do i <-identificador
-                            ws
+chamadaFuncao = do try $ do i <- identificador
                             char '('
                             ws
                             ps <- listaParametros
@@ -228,6 +225,8 @@ literal = do try $ do n <- numero
           do try $ do {char '\"'; cs <- many1 (noneOf reservados); char '\"'; return (Str cs)}
 
 atomoAritmetico = do {n <- numero; return (Numero n)}
+                  <|>
+                  do try $ do {f <- chamadaFuncao; ws; return (Fun f)}
                   <|>
                   do {i <- identificador; return (Var i)}
                   <|>

@@ -22,35 +22,29 @@
 
 .end method
 
-.method public static main(Ljava/lang/String;)V
+.method public static main([Ljava/lang/String;)V
 	.limit stack 10
 	.limit locals 10
 
 	iconst_1
 	istore 1
 
-L3:
+	iconst_2
+	istore 2
+
 	iload 1
-	bipush 10
-	if_icmple L2
-	goto L1
-L2:
-	iload 1
-	bipush 7
-	if_icmpne L0
-	goto L1
-L0:
+
+
+iload 2
+
+
+
+	invokestatic Test.f(II)I
+	istore 1
+
 	getstatic java/lang/System/out Ljava/io/PrintStream;
 	iload 1
 	invokevirtual java/io/PrintStream/println(I)V
-
-	iload 1
-	iconst_1
-	iadd
-	istore 1
-
-	goto L3
-L1:
 
 	return
 .end method

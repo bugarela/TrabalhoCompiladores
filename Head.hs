@@ -32,7 +32,6 @@ data ParametroFormal = ParamFormal Tipo Identificador deriving(Show,Eq)
 type ListaParametros = [Parametro]
 data Parametro = ParametroLiteral Literal
                | ParametroExpressao ExpressaoAritmetica
-               | ParametroFuncao ChamadaFuncao
                deriving(Show)
 
 data Declaracao = Decl Tipo [Identificador] deriving(Show)
@@ -53,6 +52,7 @@ data ExpressaoAritmetica = Multiplicacao ExpressaoAritmetica ExpressaoAritmetica
                          | Neg ExpressaoAritmetica
                          | Numero Numeral
                          | Var Identificador
+                         | Fun ChamadaFuncao
                          deriving (Show)
 
 data ExpressaoLogica = E ExpressaoLogica ExpressaoLogica
