@@ -1,13 +1,10 @@
-float f(int a,int b){
-    a = a + b;
-    return a;
+int fat(int n){
+    if (n==1 || n==0){
+        return 1;
+    }
+    return n*fat(n-1);
 }
 
 {
-    float c,d;
-    c = 1;
-    d = 2;
-    c = f(1,2);
-    print(c);
-
+    print(fat(5));
 }

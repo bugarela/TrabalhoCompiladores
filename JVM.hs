@@ -66,7 +66,7 @@ casaParametros _ _ [] _ = error ("Poucos parametros")
 casaParametros _ _ _ [] = error ("Muitos parametros")
 casaParametros ts tf (p:ps) (f:fs) = let (ls,t) = empilha ts tf p
                                          c = coercaoParam t f
-                                     in (unlines (ls ++ [c])):casaParametros ts tf ps fs
+                                     in (unlines (identa(ls ++ [c]))):casaParametros ts tf ps fs
 
 traduzChamadaFuncao ts tf (Chamada i ps) = let (i',r,pf) = buscaTipos i tf
                                                ls = unlines (casaParametros ts tf ps pf)

@@ -213,7 +213,7 @@ programa = do fs <- many funcao
 
 identificador :: Parsec String () (Identificador)
 identificador = do s <- oneOf (['a'..'z'] ++ ['_'])
-                   ss <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['-','_'] ++ ['0'..'9']))
+                   ss <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
                    ws
                    return (s:ss)
 

@@ -88,7 +88,7 @@ semanticaExpressaoLogica ts tf e = do lv <- novoLabel
 
 semanticaExpressaoAritmetica ts tf e = traduzExpr ts tf e
 
-adicionaRetorno bs = if ("return" `isInfixOf` last bs) then bs else (bs ++ identa ["return"])
+adicionaRetorno bs = if ("return" `isInfixOf` last bs) then bs else (bs ++ identa ["return\n"])
 
 verificaRetorno Void bs = if "\treturn\n" `isSuffixOf` last bs then bs else error ("Retorno encontrado em função para void")
 verificaRetorno (R TInt) bs = if "\tireturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser inteiro")
