@@ -24,7 +24,7 @@ data Retorno = R Tipo | Void deriving(Show,Eq)
 
 data DeclaracaoFuncao = Funcao Retorno Identificador DeclParametros BlocoPrincipal deriving(Show)
 
-data ChamadaFuncao = Chamada Identificador ListaParametros deriving(Show)
+data ChamadaFuncao = Chamada Identificador ListaParametros | Sqrt Parametro deriving(Show)
 
 type DeclParametros = [ParametroFormal]
 data ParametroFormal = ParamFormal Tipo Identificador deriving(Show,Eq)
@@ -43,6 +43,7 @@ data Comando = If ExpressaoLogica Bloco Bloco
              | Le Identificador
              | ChamadaProc ChamadaFuncao
              | Ret Parametro
+             | MaisIgual Identificador Parametro
              deriving(Show)
 
 data ExpressaoAritmetica = Multiplicacao ExpressaoAritmetica ExpressaoAritmetica

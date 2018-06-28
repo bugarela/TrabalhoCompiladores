@@ -37,7 +37,7 @@ store i TFloat ts = if (tipoVariavel i ts == TFloat) then ["fstore " ++ posicao 
                        error ("Atribuição de algo tipo float para a variavel " ++ i ++ " do tipo " ++ show (tipoVariavel i ts))
 
 loadConst (Numb a) = toConst a
-loadConst (Str s) = "ldc " ++ show s
+loadConst (Str s) = "ldc \"" ++ s ++ "\""
 
 tipoConst (Numb a) = tipoEA emptyRB (Numero a)
 tipoConst (Str s) = TString

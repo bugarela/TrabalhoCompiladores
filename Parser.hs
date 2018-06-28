@@ -64,7 +64,17 @@ parametro = do {e <- expressaoAritmetica; ws; return (ParametroExpressao e)}
             <|>
             do {l <- literal; ws; return (ParametroLiteral l)}
 
-chamadaFuncao = do try $ do i <- identificador
+chamadaFuncao = do try $ do string "sqrt"
+                            ws
+                            char '('
+                            ws
+                            p <- parametro
+                            ws
+                            char ')'
+                            ws
+                            return (Sqrt p)
+                <|>
+                do try $ do i <- identificador
                             char '('
                             ws
                             ps <- listaParametros
@@ -108,6 +118,15 @@ cmdAtrib = do try $ do i <- identificador
                        char ';'
                        ws
                        return (Atribui i p)
+
+cmdMaisIgual = do try $ do i <- identificador
+                           string "+="
+                           ws
+                           p <- parametro
+                           ws
+                           char ';'
+                           ws
+                           return (MaisIgual i p)
 
 cmdEnquanto = do try $ do string "while"
                           ws

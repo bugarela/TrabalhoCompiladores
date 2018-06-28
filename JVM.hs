@@ -70,5 +70,8 @@ casaParametros ts tf (p:ps) (f:fs) = let (ls,t) = empilha ts tf p
 
 traduzChamadaFuncao ts tf (Chamada i ps) = let (i',r,pf) = buscaTipos i tf
                                                ls = casaParametros ts tf ps pf
-                                               a = "invokestatic " ++ i' ++ assinaturaFuncao pf r
+                                               a = "\tinvokestatic " ++ i' ++ assinaturaFuncao pf r
                                            in ([ls] ++ [a], tipoRet r)
+traduzChamadaFuncao ts tf (Sqrt p) = let ls = casaParametros ts tf [p] [TFloat]
+                                         a = "\tinvokestatic java/lang/Math/sqrt(D)D"
+                                     in ([ls ++ "\n\tf2d"] ++ [a] ++ ["d2f"], TFloat)
