@@ -37,7 +37,7 @@ semanticaBloco ts tf cs = do bs <- mapM (semanticaComando ts tf) cs
 semanticaComando ts tf (Atribui i (ParametroExpressao p)) = do let (sea,t) = semanticaExpressaoAritmetica ts tf p
                                                                return (unlines (identa (sea ++ store i t ts)))
 
-semanticaComando ts tf (Atribui i (ParametroLiteral l)) = return (unlines (identa ((fst (empilha ts tf (ParametroLiteral l))) ++ (store i (tipoConst l) ts))))
+semanticaComando ts tf (Atribui i (ParametroLiteral l)) = return (unlines ((fst (empilha ts tf (ParametroLiteral l))) ++ identa (store i (tipoConst l) ts)))
 
 semanticaComando ts tf (If e b1 []) = do (se,lf) <- semanticaExpressaoLogica ts tf e
                                          s1 <- semanticaBloco ts tf b1
@@ -61,13 +61,11 @@ semanticaComando ts tf (Escreve a) = do let p = empilha ts tf a
                                         return (unlines (identa ([getstatic Print] ++ fst p ++ [invokevirtual Print (snd p)])))
 
 semanticaComando ts tf (ChamadaProc c) = do let (s,_) = (traduzChamadaFuncao ts tf c)
-                                            return (unlines (identa s))
+                                            return (unlines s)
 
 semanticaComando ts tf (Ret a) = do let (p,t) = empilha ts tf a
                                         r = pre t ++ "return"
                                     return (unlines (identa (p ++ [r])))
-
-semanticaComando _ _ _ = return ""
 
 semanticaDeclaracoes ds = insereTabelaSimbolos ds emptyRB 1
 semanticaDeclFuncoes df a = do let tf = (insereTabelaFuncoes df emptyRB, a)
@@ -94,7 +92,7 @@ verificaRetorno Void bs = if "\treturn\n" `isSuffixOf` last bs then bs else erro
 verificaRetorno (R TInt) bs = if "\tireturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser inteiro")
 verificaRetorno (R TString) bs = if "\tareturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser string")
 verificaRetorno (R TFloat) bs = if "\tireturn\n" `isSuffixOf` last bs
-                                then (init bs) ++ identa(["i2f"] ++ ["freturn"])
+                                then [(semReturn (last bs))] ++ identa(["i2f"] ++ ["freturn"])
                                 else if "\tfreturn\n" `isSuffixOf` last bs then bs else error ("Retorno deveria ser float")
 --------- Testes --------
 

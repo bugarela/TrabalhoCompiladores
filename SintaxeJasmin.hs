@@ -14,7 +14,9 @@ assinaturaFuncao ls r = "(" ++ letras ls ++ ")" ++ letraR r
 nomeClasse ('.':ss) = []
 nomeClasse (s:ss) = s:nomeClasse ss
 
-identa = map (\s -> '\t':s)
+identa = map identa'
+identa' ('\t':s) = ('\t':s)
+identa' s = ('\t':s)
 
 getstatic Print = "getstatic java/lang/System/out Ljava/io/PrintStream;"
 

@@ -5,7 +5,7 @@ import Tabelas
 import Aux
 import SintaxeJasmin
 
-coercaoParam TInt TFloat = "i2f"
+coercaoParam TInt TFloat = "\n\ti2f"
 coercaoParam tp t = if tp == t then "" else error ("Um parametro deveria ser do tipo " ++ show t)
 
 
@@ -66,9 +66,9 @@ casaParametros _ _ [] _ = error ("Poucos parametros")
 casaParametros _ _ _ [] = error ("Muitos parametros")
 casaParametros ts tf (p:ps) (f:fs) = let (ls,t) = empilha ts tf p
                                          c = coercaoParam t f
-                                     in (unlines (identa(ls ++ [c]))):casaParametros ts tf ps fs
+                                     in (((unlines (identa ls)) ++ c) ++ casaParametros ts tf ps fs)
 
 traduzChamadaFuncao ts tf (Chamada i ps) = let (i',r,pf) = buscaTipos i tf
-                                               ls = unlines (casaParametros ts tf ps pf)
+                                               ls = casaParametros ts tf ps pf
                                                a = "invokestatic " ++ i' ++ assinaturaFuncao pf r
                                            in ([ls] ++ [a], tipoRet r)

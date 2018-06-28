@@ -133,24 +133,24 @@ cmdSe = do try $ do string "if"
                     b2 <- bloco
                     return (If el b1 b2)
        <|>
-       do string "if"
-          ws
-          char '('
-          ws
-          el <- expressaoLogica
-          ws
-          char ')'
-          ws
-          b1 <- bloco
-          return (If el b1 [])
+       do try $ do string "if"
+                   ws
+                   char '('
+                   ws
+                   el <- expressaoLogica
+                   ws
+                   char ')'
+                   ws
+                   b1 <- bloco
+                   return (If el b1 [])
 
-retorno = do string "return "
-             ws
-             p <- parametro
-             ws
-             char ';'
-             ws
-             return (Ret p)
+retorno = do try $ do string "return "
+                      ws
+                      p <- parametro
+                      ws
+                      char ';'
+                      ws
+                      return (Ret p)
 
 comando = cmdSe <|> cmdEnquanto <|> cmdAtrib <|> cmdEscrita <|> cmdLeitura <|> chamadaProc <|> retorno
 listaCmd = many1 comando

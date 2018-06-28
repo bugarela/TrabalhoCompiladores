@@ -5,6 +5,33 @@ int fat(int n){
     return n*fat(n-1);
 }
 
+void imprime(string algo){
+    print(algo);
+}
+
+float cast(int n){
+    int a;
+    float b,c;
+    a = 1;
+    b = a;
+    c = b;
+    return n*a+b-c;
+}
+
 {
-    print(fat(5));
+    int a;
+    float b;
+
+    a = fat(5);
+    print(a);
+    print(fat(1+1)+1);
+    if (!a == 120 || 1+1 > 3){
+        print("Deu ruim");
+    } else {
+        if(fat(0) == 1 && fat(1) == 1){
+            print("Deu boa");
+        }
+    }
+    imprime("ALGO");
+    b = cast(a);
 }

@@ -62,3 +62,5 @@ tipoRet (Void) = error("Operacao com funcao que retorna void")
 
 fold [] = []
 fold (f:fs) = f ++ fold fs
+
+semReturn s = take (length s - 9) s
